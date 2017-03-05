@@ -32,6 +32,7 @@ public class MainActivity extends AppCompatActivity
     private TextView temp;
     private LineGraphSeries<DataPoint> series;
     private float t = 0;
+    private TextView acc;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -77,6 +78,12 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 float flex = dataSnapshot.child("intensity").getValue(Float.class);
+
+
+
+
+
+
                 intensity.setText(Float.toString(flex));
             }
 
@@ -106,10 +113,10 @@ public class MainActivity extends AppCompatActivity
                 float beat =  dataSnapshot.child("change").getValue(Float.class);
 
                 t += .5;
-                series.appendData(new DataPoint(t, beat), true, 100);
+                series.appendData(new DataPoint(t, (beat/2.5)), true, 250);
 
 
-                heartbeat.setText(Float.toString(beat));
+                heartbeat.setText(Float.toString((float) (beat/2.5)));
 
 
             }
@@ -149,6 +156,38 @@ public class MainActivity extends AppCompatActivity
 
 
 
+        acc = (TextView) findViewById(R.id.acc_id);
+
+
+        DatabaseReference acc_ref = fire_base_database.getReference("live/accelerometer");
+
+        // Read from the fire_base+database
+        acc_ref.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot)
+            {
+                float x = dataSnapshot.child("x").getValue(Float.class);
+                float y = dataSnapshot.child("y").getValue(Float.class);
+                float z = dataSnapshot.child("z").getValue(Float.class);
+
+
+                if(z > x && z > y)
+                {
+                    acc.setText("Upright");
+                }
+                else
+                {
+                    acc.setText("Prone");
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError error) {
+                Log.w("FIREBASE", "Failed to read value.", error.toException());
+            }
+        });
+
+        acc.setText("");
 
 
 
